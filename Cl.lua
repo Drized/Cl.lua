@@ -1,7 +1,7 @@
 local Player = game:GetService("Players").LocalPlayer
 
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("Luna's GUI | I SUPPORT LGBTQIA+ |", "GrapeTheme")
+local Window = Library.CreateLib("Discord : Drized |", "BloodTheme")
 
 local ATab = Window:NewTab("Autofarm")
 local ASection = ATab:NewSection("Autofarm")
@@ -149,16 +149,6 @@ local HRP = game:GetService("Players").LocalPlayer.Character:FindFirstChild("Hum
     elseif CurrentOption == "Avatar of Radismus (Blood Wipe)" then HRP.CFrame = CFrame.new(5230.36, 384.857, 1645.1)
     elseif CurrentOption == "Smile (Hyper)" then HRP.CFrame = CFrame.new(-1201, -123, 2573)
     end
-end)
-
-CSection:NewDropdown("Teleport To Class Statue", "Teleports you to the chosen Class Statue", StatuesTable, function(CurrentOption)
-local Player = game:GetService("Players").LocalPlayer 
-local Character = Player.Character or Player.CharacterAdded:Wait()
-HRP = Player.Character:FindFirstChild("HumanoidRootPart")
-
-if HRP then
-HRP.CFrame = workspace.Statues:FindFirstChild(CurrentOption):FindFirstChild("ProximityPrompt", true).Parent.Parent.CFrame
-end
 end)
 
 CSection:NewButton("Teleport To Blackmarket", "Teleports the player to blackmarket", function()
