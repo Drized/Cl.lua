@@ -1,7 +1,7 @@
 local Player = game:GetService("Players").LocalPlayer
 
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Drized/IDK-i-just-wanna-use/refs/heads/main/main.lua"))()
-local Window = Library.CreateLib("Drized GUI | Not for pubilc |", "BloodTheme")
+local Window = Library.CreateLib("Luna's GUI | I SUPPORT LGBTQIA+ |", "GrapeTheme")
 
 local ATab = Window:NewTab("Autofarm")
 local ASection = ATab:NewSection("Autofarm")
@@ -16,52 +16,39 @@ if v:IsA("ObjectValue") and v.Parent.Name == "Enemy" and v.Parent:IsA("Model") a
     end
 end
 end
--- Utility Function to Teleport to a Specific Position
-local function teleportToPosition(target, conditions)
-    if target and conditions() then
-        local HRP = Player.Character:FindFirstChild("HumanoidRootPart")
-        if HRP then
-            HRP.CFrame = target.CFrame
+
+ASection:NewDropdown("Teleport To Mob", "Teleports you to the mob selected once(repeatable)", Mobs, function(CurrentOption)
+local HRP = Player.Character:FindFirstChild("HumanoidRootPart")
+local Enemies = workspace.Enemies:GetDescendants()
+   for i,v in next, Enemies do 
+      if v.Parent.Name == "Enemy" and v:IsA("BasePart") and v.Name == "EnemyLocation" and tostring(v.Parent.Model.Value) == CurrentOption and v.Parent.InCombat.Value == false and v.Parent:FindFirstChild("EnemyDefeat") ~= true then
+         HRP.CFrame = v.CFrame
+      end
+   end
+end)
+
+getgenv().stopautotpmobloop = false
+
+ASection:NewDropdown("Autoteleport To Mob", "Automatically teleports you to the mob selected", Mobs, function(CurrentOption)
+spawn(function()
+    while not stopautotpmobloop and wait(0.5) do
+local HRP = Player.Character:FindFirstChild("HumanoidRootPart")
+local Enemies = workspace.Enemies:GetDescendants()
+        if getgenv().stopautotpmobloop == true then
+            break
+        end
+    local CombatFolder = workspace:FindFirstChild("CombatFolder")
+        if CombatFolder == nil then
+            for i,v in next, Enemies do 
+                if v.Parent.Name == "Enemy" and v:IsA("BasePart") and v.Name == "EnemyLocation" and tostring(v.Parent.Model.Value) == CurrentOption and v.Parent.InCombat.Value == false and v.Parent:FindFirstChild("EnemyDefeat") ~= true then
+                    HRP.CFrame = v.CFrame
+                    break
+                end
+            end
         end
     end
-end
-
--- Auto-Teleport to Mob Dropdown
-ASection:NewDropdown("Autoteleport To Mob", "Automatically teleports you to the mob selected", Mobs, function(CurrentOption)
-    spawn(function()
-        while not stopautotpmobloop and wait(0.5) do
-            local Enemies = workspace.Enemies:GetDescendants()
-            local CombatFolder = workspace:FindFirstChild("CombatFolder")
-            if not CombatFolder then
-                for _, v in next, Enemies do
-                    if v.Parent.Name == "Enemy" and v:IsA("BasePart") and v.Name == "EnemyLocation" and tostring(v.Parent.Model.Value) == CurrentOption and v.Parent.InCombat.Value == false and v.Parent:FindFirstChild("EnemyDefeat") ~= true then
-                        teleportToPosition(v, function() return true end)
-                        break
-                    end
-                end
-            end
-        end
-    end)
 end)
-
--- Auto-Orb Teleport Toggle
-ASection:NewToggle("Auto OrbTP", "Teleports you to orbs automatically (portal relic)", function(State)
-    Tp = State
-    task.spawn(function()
-        while Tp and wait(0.001) do
-            local CombatFolder = workspace:FindFirstChild("CombatFolder")
-            if CombatFolder and CombatFolder:FindFirstChild(Player.Name) then
-                local MyFol = CombatFolder:FindFirstChild(Player.Name):GetDescendants()
-                for _, v in pairs(MyFol) do
-                    if v:IsA("BasePart") and (v.Name == "HitBox" or v.Name == "Base") then
-                        teleportToPosition(v, function() return true end)
-                    end
-                end
-            end
-        end
-    end)
 end)
-
 
 ASection:NewButton("Stop AutoMobTP", "Stops automatically teleporting to the mob selected", function()
 getgenv().stopautotpmobloop = true
@@ -73,25 +60,25 @@ local Tp = true
 
 ASection:NewToggle("Auto OrbTP", "Teleports you to orbs automatically (portal relic)", function(State)
     Tp = State
-    task.spawn(function()
-        while Tp and wait() do
-            local Player = game:GetService("Players").LocalPlayer
+task.spawn(function()
+    while Tp and wait(0.001) do
+	local MyFol
+        local CombatFolder = workspace:FindFirstChild("CombatFolder")
+        if CombatFolder ~= nil and CombatFolder:FindFirstChild(Player.Name) then
+	    local Player = game:GetService("Players").LocalPlayer	
             local Character = Player.Character or Player.CharacterAdded:Wait()
             local HRP = Character:FindFirstChild("HumanoidRootPart")
-            local CombatFolder = workspace:FindFirstChild("CombatFolder")
-            if CombatFolder then
-                local MyFol = CombatFolder:FindFirstChild(Player.Name)
-                if MyFol then
-                    local MyDescendants = MyFol:GetDescendants()
-                    for _, v in pairs(MyDescendants) do
-                        if v:IsA("BasePart") and (v.Name == "HitBox" or v.Name == "Base") then
-                            HRP.CFrame = v.CFrame
-                        end
-                    end
+            MyFol = CombatFolder:FindFirstChild(Player.Name):GetDescendants()
+	    if MyFol then
+            for i,v in pairs(MyFol) do
+                if v:IsA("BasePart") and v.Name == "HitBox" or v.Name == "Base" then
+                    HRP.CFrame = v.CFrame
                 end
             end
+	end
         end
-    end)
+    end
+end)
 end)
 
 local Acts = true
@@ -125,53 +112,23 @@ game:GetService("ReplicatedStorage"):WaitForChild("Server"):FireServer(unpack(ar
 end
 end)
 
-local CTab = Window:NewTab("Teleport")
-local CSection = CTab:NewSection("Teleport")
+local BTab = Window:NewTab("Fruits/Trees/Pickups")
+local BSection = BTab:NewSection("Fruits/Trees/Pickups")
 
-local ArsenalTab = {}
-local Arsenals = workspace:WaitForChild("Arsenals"):GetDescendants()
-
-for i,v in pairs(Arsenals) do
-    if v:IsA("BasePart") and v.Parent.Parent.Name == "Arsenals" then
-        if not table.find(ArsenalTab,v.Parent.Name) then
-            table.insert(ArsenalTab,v.Parent.Name)
-        end
-    end
-end
-
-table.insert(ArsenalTab,"Void")
-table.insert(ArsenalTab,"Land Under The Waterfall")
-table.sort(ArsenalTab)
-
-CSection:NewDropdown("Teleport To Arsenal", "Teleports you to the selected arsenal", ArsenalTab, function(CurrentOption)
-    local HRP = Player.Character:FindFirstChild("HumanoidRootPart")
-    if CurrentOption == "Land Under The Waterfall" then
-        HRP.CFrame = CFrame.new(-19912,-110,-6258)
-    elseif CurrentOption == "Void" then
-        HRP.CFrame = CFrame.new(-19396,-73,-4085)
-    else
-        HRP.CFrame = workspace.Arsenals:FindFirstChild(CurrentOption):FindFirstChild("Base").CFrame
-    end
+local Mats = true
+local MaterialGivers = game:GetService("Workspace"):FindFirstChild("MaterialGivers"):GetDescendants()
+BSection:NewButton("Teleport To A Deathbush/SweetLoveBush", "Teleports you to a Deathbush if it exists", function()
+local HRP = Player.Character:FindFirstChild("HumanoidRootPart")
+local WorkspaceD = workspace:GetDescendants()
+   for i,v in next, WorkspaceD do 
+      if v.Name == "Middle" and v.Parent.Parent == workspace and v.Parent.Name == "DeathBush" then
+         HRP.CFrame = v.CFrame
+      end
+   end
 end)
 
-local NPCs = {}
-table.insert(NPCs,"Smile (Hyper)")
-table.insert(NPCs,"Bottle of ??? (Hunter)")
-table.insert(NPCs,"Blind Grillby (Burning Head)")
-table.insert(NPCs,"Cursed Altar (Cursed)")
-table.insert(NPCs,"Gabriel (Ocean Glider)")
-table.insert(NPCs,"Green Light Green Light (Portal)")
-table.insert(NPCs,"Gears (Time Grinders)")
-table.insert(NPCs,"Mixed Letter (Ghoul)")
-table.insert(NPCs,"Holy Cross (Holy)")
-table.insert(NPCs,"Bottle (Gravity Boots)")
-table.insert(NPCs,"Ancient Paw (Pull)")
-table.insert(NPCs,"Noob (Torch)")
-table.insert(NPCs,"Broski (Bounty Hunter)")
-table.insert(NPCs,"Jeff (Berserk)")
-table.insert(NPCs,"Gem (Crystalized)")
-table.insert(NPCs,"Avatar of Radismus (Blood Wipe)")
-
+local CTab = Window:NewTab("Teleport")
+local CSection = CTab:NewSection("Teleport")
 
 CSection:NewDropdown("Teleport To Chosen Relic NPC", "Teleports you to the chosen Relic NPC", NPCs, function(CurrentOption)
 local HRP = game:GetService("Players").LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
@@ -193,44 +150,6 @@ local HRP = game:GetService("Players").LocalPlayer.Character:FindFirstChild("Hum
     elseif CurrentOption == "Smile (Hyper)" then HRP.CFrame = CFrame.new(-1201, -123, 2573)
     end
 end)
-
-local NPCTable = {}
-local NPCFol = workspace.QuestNPCs:GetDescendants()
-table.insert(NPCTable,"Grani")
-table.insert(NPCTable,"King Blubb")
-
-for i,v in pairs(NPCFol) do
-if v.Name == "HumanoidRootPart" and v.Parent:IsA("Model") then
-if not table.find(NPCTable,v.Parent.Name) then
-table.insert(NPCTable,v.Parent.Name)
-end
-end
-end
-
-CSection:NewDropdown("Teleport To QuestNPC (Grani/Blubb too)", "Teleports you to the chosen Quest NPC", NPCTable, function(CurrentOption)
-local Player = game:GetService("Players").LocalPlayer 
-local Character = Player.Character or Player.CharacterAdded:Wait()
-HRP = Player.Character:FindFirstChild("HumanoidRootPart")
-if HRP then
-	if CurrentOption == "Grani" then
-		HRP.CFrame = CFrame.new(6737.32, 144.011, 9794.26)
-	elseif CurrentOption == "King Blubb" then
-		HRP.CFrame = CFrame.new(-3723.83, 431.422, -5055.45)
-	else  HRP.CFrame = workspace.QuestNPCs:FindFirstChild(CurrentOption).HumanoidRootPart.CFrame
-	end
-end
-end)
-
-local StatuesFol = workspace.Statues:GetDescendants()
-local StatuesTable = {}
-
-for i,v in pairs(StatuesFol) do
-if v.Name == "ProximityPrompt" and v.Parent.Name == "Attachment" then
-if not table.find(StatuesTable,v.Parent.Parent.Parent.Name) then
-table.insert(StatuesTable,v.Parent.Parent.Parent.Name)
-end
-end
-end
 
 CSection:NewDropdown("Teleport To Class Statue", "Teleports you to the chosen Class Statue", StatuesTable, function(CurrentOption)
 local Player = game:GetService("Players").LocalPlayer 
@@ -279,7 +198,7 @@ DSection:NewKeybind("Toggle UI Button", "Toggle UI Button", Enum.KeyCode.LeftCon
 	Library:ToggleUI()
 end)
 
-DSection:NewButton("Get all Chests", "Opens all the chests", function()
+DSection:NewButton("Open all Chests", "Opens all the chests", function()
     local Chests = workspace:FindFirstChild("Chests"):GetDescendants()
 local HRP = game:GetService("Players").LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 for i,v in pairs (Chests) do
