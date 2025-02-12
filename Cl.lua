@@ -16,39 +16,52 @@ if v:IsA("ObjectValue") and v.Parent.Name == "Enemy" and v.Parent:IsA("Model") a
     end
 end
 end
-
-ASection:NewDropdown("Teleport To Mob", "Teleports you to the mob selected once(repeatable)", Mobs, function(CurrentOption)
-local HRP = Player.Character:FindFirstChild("HumanoidRootPart")
-local Enemies = workspace.Enemies:GetDescendants()
-   for i,v in next, Enemies do 
-      if v.Parent.Name == "Enemy" and v:IsA("BasePart") and v.Name == "EnemyLocation" and tostring(v.Parent.Model.Value) == CurrentOption and v.Parent.InCombat.Value == false and v.Parent:FindFirstChild("EnemyDefeat") ~= true then
-         HRP.CFrame = v.CFrame
-      end
-   end
-end)
-
-getgenv().stopautotpmobloop = false
-
-ASection:NewDropdown("Autoteleport To Mob", "Automatically teleports you to the mob selected", Mobs, function(CurrentOption)
-spawn(function()
-    while not stopautotpmobloop and wait(0.5) do
-local HRP = Player.Character:FindFirstChild("HumanoidRootPart")
-local Enemies = workspace.Enemies:GetDescendants()
-        if getgenv().stopautotpmobloop == true then
-            break
+-- Utility Function to Teleport to a Specific Position
+local function teleportToPosition(target, conditions)
+    if target and conditions() then
+        local HRP = Player.Character:FindFirstChild("HumanoidRootPart")
+        if HRP then
+            HRP.CFrame = target.CFrame
         end
-    local CombatFolder = workspace:FindFirstChild("CombatFolder")
-        if CombatFolder == nil then
-            for i,v in next, Enemies do 
-                if v.Parent.Name == "Enemy" and v:IsA("BasePart") and v.Name == "EnemyLocation" and tostring(v.Parent.Model.Value) == CurrentOption and v.Parent.InCombat.Value == false and v.Parent:FindFirstChild("EnemyDefeat") ~= true then
-                    HRP.CFrame = v.CFrame
-                    break
+    end
+end
+
+-- Auto-Teleport to Mob Dropdown
+ASection:NewDropdown("Autoteleport To Mob", "Automatically teleports you to the mob selected", Mobs, function(CurrentOption)
+    spawn(function()
+        while not stopautotpmobloop and wait(0.5) do
+            local Enemies = workspace.Enemies:GetDescendants()
+            local CombatFolder = workspace:FindFirstChild("CombatFolder")
+            if not CombatFolder then
+                for _, v in next, Enemies do
+                    if v.Parent.Name == "Enemy" and v:IsA("BasePart") and v.Name == "EnemyLocation" and tostring(v.Parent.Model.Value) == CurrentOption and v.Parent.InCombat.Value == false and v.Parent:FindFirstChild("EnemyDefeat") ~= true then
+                        teleportToPosition(v, function() return true end)
+                        break
+                    end
                 end
             end
         end
-    end
+    end)
 end)
+
+-- Auto-Orb Teleport Toggle
+ASection:NewToggle("Auto OrbTP", "Teleports you to orbs automatically (portal relic)", function(State)
+    Tp = State
+    task.spawn(function()
+        while Tp and wait(0.001) do
+            local CombatFolder = workspace:FindFirstChild("CombatFolder")
+            if CombatFolder and CombatFolder:FindFirstChild(Player.Name) then
+                local MyFol = CombatFolder:FindFirstChild(Player.Name):GetDescendants()
+                for _, v in pairs(MyFol) do
+                    if v:IsA("BasePart") and (v.Name == "HitBox" or v.Name == "Base") then
+                        teleportToPosition(v, function() return true end)
+                    end
+                end
+            end
+        end
+    end)
 end)
+
 
 ASection:NewButton("Stop AutoMobTP", "Stops automatically teleporting to the mob selected", function()
 getgenv().stopautotpmobloop = true
