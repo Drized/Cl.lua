@@ -1,6 +1,6 @@
 local Player = game:GetService("Players").LocalPlayer
 
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Drized/IDK-i-just-wanna-use/refs/heads/main/main.lua"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
 local Window = Library.CreateLib("Luna's GUI | I SUPPORT LGBTQIA+ |", "GrapeTheme")
 
 local ATab = Window:NewTab("Autofarm")
